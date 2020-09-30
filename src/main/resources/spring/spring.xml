@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
+    <!--编译时，加上这句-->
+    <!--,file:${user.dir}/config/config.properties-->
+    <util:properties id="properties" location="classpath:config.properties"></util:properties>
+
+    <bean id="ocrClient" class="com.kais.core.OcrClient"></bean>
+
+    <!--扫描utils组件-->
+    <context:component-scan base-package="com.kais.components.utils"></context:component-scan>
+    <!--扫描views-->
+    <context:component-scan base-package="com.kais.views"></context:component-scan>
+
+    <!--Quartz-->
+    <!--<bean id="job" class="com.kais.core.task.TestJob"></bean>-->
+    <!--<bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+
+        <!--<property name="group" value="job_work"></property>-->
+        <!--<property name="name" value="test_job"></property>-->
+        <!--<property name="concurrent" value="true"></property>-->
+        <!--<property name="targetObject">-->
+            <!--<ref bean="job"></ref>-->
+        <!--</property>-->
+        <!--<property name="targetMethod">-->
+            <!--<value>run</value>-->
+        <!--</property>-->
+    <!--</bean>-->
+
+    <!--<bean id="jobTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+
+        <!--<property name="group" value="job_work"></property>-->
+        <!--<property name="name" value="running by one minute"></property>-->
+        <!--<property name="jobDetail">-->
+            <!--<ref bean="jobDetail"></ref>-->
+        <!--</property>-->
+        <!--<property name="cronExpression" value="0/5 * * * * ? *"></property>-->
+    <!--</bean>-->
+
+    <bean id="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean"></bean>
+    <!--<bean id="schedulerTaskFactory" class="com.kais.core.task.SchedulerTaskFactory"></bean>bean-->
+
+    <bean id="utilsManager" class="com.kais.components.utils.UtilsManager"></bean>
+</beans>
