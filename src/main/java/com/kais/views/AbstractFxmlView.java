@@ -46,10 +46,12 @@ public abstract class AbstractFxmlView implements ApplicationContextAware {
 
         title = view.title();
         fxml = view.value();
+
+        System.out.println(language);
     }
 
     public Initializable showView() throws IOException {
-
+        System.out.println(language);
         FXMLLoader loader = new FXMLLoader();
         loader.setBuilderFactory(new JavaFXBuilderFactory());
         Resource resource = new ClassPathResource(fxml);

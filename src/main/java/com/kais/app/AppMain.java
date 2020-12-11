@@ -41,9 +41,9 @@ public class AppMain extends Application {
     static final int HEIGHT = 500;
 
     static final String APPLICATION_CONTEXT_XML = "spring/spring.xml";
+    static final String MAIN = "fxml/main.fxml";
 
     /**
-     *
      * spring Context
      */
     public static final ApplicationContext CONTEXT = new ClassPathXmlApplicationContext(APPLICATION_CONTEXT_XML);
@@ -51,7 +51,7 @@ public class AppMain extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        Parent root = loadFxml("fxml/main.fxml");
+        Parent root = loadFxml(MAIN);
         Scene scene = new Scene(root, WIDTH, HEIGHT);
 
         primaryStage.setTitle("工具");
@@ -60,6 +60,7 @@ public class AppMain extends Application {
         primaryStage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, (WindowEvent e) -> {
 
             Platform.exit();
+            System.exit(0);
         });
     }
 
@@ -74,7 +75,7 @@ public class AppMain extends Application {
      * @param fxml
      * @return
      */
-    public static Parent loadFxml(String fxml){
+    public static Parent loadFxml(String fxml) {
 
         try {
 
@@ -133,7 +134,7 @@ public class AppMain extends Application {
      * @return controller
      * @throws IOException
      */
-    public static <T extends AbstractFxmlView> void showAndWait(Class<T> clazz, Consumer<Initializable> doConsumer, Consumer<Initializable> closeConsumer){
+    public static <T extends AbstractFxmlView> void showAndWait(Class<T> clazz, Consumer<Initializable> doConsumer, Consumer<Initializable> closeConsumer) {
 
         try {
 
@@ -152,7 +153,7 @@ public class AppMain extends Application {
      * @return controller
      * @throws IOException
      */
-    public static <T extends AbstractFxmlView> void showAndWaitOnStart(Class<T> clazz, Consumer<Initializable> doConsumer){
+    public static <T extends AbstractFxmlView> void showAndWaitOnStart(Class<T> clazz, Consumer<Initializable> doConsumer) {
 
         try {
 
@@ -171,7 +172,7 @@ public class AppMain extends Application {
      * @return controller
      * @throws IOException
      */
-    public static <T extends AbstractFxmlView> void showAndWaitOnClose(Class<T> clazz, Consumer<Initializable> closeConsumer){
+    public static <T extends AbstractFxmlView> void showAndWaitOnClose(Class<T> clazz, Consumer<Initializable> closeConsumer) {
 
         try {
 

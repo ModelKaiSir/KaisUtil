@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * @author QiuKai
  */
 @Component
-public class SchedulerTask extends AbstractUtilComponent {
+public class Remind extends AbstractUtilComponent {
 
     @Override
     protected String getCaption() {

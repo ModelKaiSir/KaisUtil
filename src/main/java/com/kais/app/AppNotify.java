@@ -116,22 +116,25 @@ public class AppNotify {
         return info(SYSTEM_CALL, SYSTEM_SUCCESS);
     }
 
-    public static void toppingMessage(String nv) {
+    public static void toppingMessage(String nv){
+
+        toppingMessage(SYSTEM_CALL, nv);
+    }
+
+    public static void toppingMessage(String title, String nv) {
 
         Stage stage = new Stage();
 
-        Parent parent = AppMain.loadFxml(TOPPING_MESSAGE_UI);
+        DialogPane dialogPane = new DialogPane();
+        dialogPane.setContentText(nv);
+        dialogPane.getButtonTypes().addAll(ButtonType.OK);
 
-        Text message = (Text) parent.lookup("#message");
-        message.setText(nv);
+        Button ok = (Button) dialogPane.lookupButton(ButtonType.OK);
+        ok.setOnAction((e) -> stage.close());
 
-        Button confirm = (Button) parent.lookup("#confirm");
-        confirm.setOnAction(e -> {
-            stage.close();
-        });
-
-        stage.setScene(new Scene(parent));
-        stage.initStyle(StageStyle.UNDECORATED);
+        stage.setTitle(title);
+        stage.setScene(new Scene(dialogPane));
+        stage.initStyle(StageStyle.DECORATED);
         stage.initModality(Modality.WINDOW_MODAL);
         stage.centerOnScreen();
         stage.setAlwaysOnTop(true);

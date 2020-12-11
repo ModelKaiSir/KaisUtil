@@ -1,26 +1,18 @@
 package com.kais.controllers.utils.scheduler;
 
-import com.kais.app.AppMain;
 import com.kais.app.AppNotify;
-import com.kais.core.task.SchedulerTask;
-import com.kais.core.task.SchedulerTaskFactory;
-import com.kais.core.task.SimpleSchedulerTask;
+import com.kais.core.task.quartz.AppNotifySchedulerTask;
+import com.kais.core.task.quartz.QuartzJobFactory;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import org.omg.CosNaming.NamingContextPackage.NotFound;
-import org.quartz.*;
-import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.util.Assert;
 
 import java.net.URL;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +56,7 @@ public class RemindController implements Initializable {
         setSchedulerItems();
         setNotifyItems();
 
-        timeUnit.setItems(FXCollections.observableArrayList(TimeUnit.values()));
+        timeUnit.setItems(FXCollections.observableArrayList(new TimeUnit[]{ TimeUnit.SECONDS, TimeUnit.MINUTES, TimeUnit.HOURS, TimeUnit.DAYS }));
         timeUnit.valueProperty().addListener(this::timeUnitChange);
 
         timeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 24));
@@ -75,12 +67,14 @@ public class RemindController implements Initializable {
 
         schedulerGroup = new ToggleGroup();
         schedulerGroup.getToggles().addAll(normal, repeat);
+        schedulerGroup.selectToggle(normal);
     }
 
     protected void setNotifyItems() {
 
         notifyGroup = new ToggleGroup();
         notifyGroup.getToggles().addAll(unNotify, notify);
+        notifyGroup.selectToggle(notify);
     }
 
     void timeUnitChange(ObservableValue<? extends TimeUnit> observable, TimeUnit oldValue, TimeUnit newValue) {
@@ -105,6 +99,15 @@ public class RemindController implements Initializable {
         }
     }
 
+    private Optional<String> translateTimeUnit(TimeUnit unit) {
+
+        if (unit == TimeUnit.SECONDS) {
+            return Optional.of("秒");
+        } else {
+            return Optional.empty();
+        }
+    }
+
     @FXML
     public void confirm(ActionEvent event) {
 
@@ -113,16 +116,31 @@ public class RemindController implements Initializable {
 
             Assert.notNull(timeUnit, "时间单位不能为空！");
 
-            //添加Scheduler Job
-            SchedulerTask task = SimpleSchedulerTask.of(timeUnit, timeSpinner.getValue(), title.getText(), comment.getText());
-            SchedulerTaskFactory.submitTask(task);
+            //添加Quartz Scheduler Job
+            QuartzJobFactory.submitTask(AppNotifySchedulerTask
+                    .of(timeSpinner.getValue(), title.getText(), comment.getText())
+                    .withUnit(timeUnit)
+                    .withRepeat(() -> schedulerGroup.getSelectedToggle().equals(repeat))
+                    .popup(() -> notifyGroup.getSelectedToggle().equals(notify)));
 
-            //AppNotify.info(timeUnit.format(timeSpinner.getValue())).showAndWait();
-        }
-        catch (IllegalArgumentException e){
+            long minutes;
+            Optional<String> unit;
+
+            if (timeUnit == TimeUnit.SECONDS) {
+
+                minutes = timeSpinner.getValue();
+                unit = translateTimeUnit(timeUnit);
+            } else {
+
+                minutes = TimeUnit.MINUTES.convert(timeSpinner.getValue(), timeUnit);
+                unit = translateTimeUnit(timeUnit);
+            }
+
+            AppNotify.info(String.format("%d%s后执行任务", minutes, unit.orElse("分钟"))).showAndWait();
+        } catch (IllegalArgumentException e) {
 
             AppNotify.info(e.getMessage());
-        }catch (Exception e) {
+        } catch (Exception e) {
 
             AppNotify.error(e);
         }

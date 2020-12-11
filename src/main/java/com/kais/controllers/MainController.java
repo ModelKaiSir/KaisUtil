@@ -3,19 +3,18 @@ package com.kais.controllers;
 import com.kais.app.AppMain;
 import com.kais.components.utils.UtilComponent;
 import com.kais.components.utils.UtilsManager;
-import com.kais.views.TestView;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
+import com.kais.domain.User;
+import com.kais.services.UserService;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
 import javafx.scene.layout.FlowPane;
-import javafx.stage.WindowEvent;
-import jdk.management.resource.internal.inst.SocketOutputStreamRMHooks;
-import sun.plugin2.os.windows.FLASHWINFO;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.sqlite.JDBC;
 
-import java.io.IOException;
 import java.net.URL;
+import java.sql.JDBCType;
 import java.util.ResourceBundle;
 
 /**

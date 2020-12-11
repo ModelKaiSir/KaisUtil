@@ -35,12 +35,6 @@ public class AppUtils {
         }
     }
 
-    public static <V, P> void backgroundTask(Task<V> task, Consumer<P> consumer, P data) {
-
-        new Thread(task).start();
-        task.setOnRunning((WorkerStateEvent e) -> consumer.accept(data));
-    }
-
     public static class BackgroundTaskBuilder<V> {
 
         EventHandler<WorkerStateEvent> running;
