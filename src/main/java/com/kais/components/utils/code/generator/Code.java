@@ -1,6 +1,10 @@
 package com.kais.components.utils.code.generator;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
+import java.lang.reflect.Modifier;
+import java.util.List;
 
 /**
  * 代码
@@ -10,17 +14,58 @@ import com.google.common.base.Joiner;
  */
 public interface Code {
 
-    public static final Code NEW = Code.toCode("new");
-    public static final Code END = Code.toCode(";");
-    public static final Code EMPTY = Code.toCode("");
+    Code HEADER = Code.toCode("{");
+    Code FOOT = Code.toCode("}");
+    Code EMPTY = Code.toCode("");
+    Code END = Code.toCode(";");
 
     /**
-     * 输出格式化代码
+     * 输出代码
      *
      * @return
      */
     @Override
     String toString();
+
+    default CodeFormat getCodeFormat() {
+
+        return CodeFormats.GENERAL;
+    }
+
+    static Code getScope(int modifier) {
+
+        if (Modifier.isPublic(modifier)) {
+
+            return Code.toCode("public");
+        } else if (Modifier.isProtected(modifier)) {
+
+            return Code.toCode("protected");
+        } else if (Modifier.isPrivate(modifier)) {
+
+            return Code.toCode("private");
+        } else {
+
+            return Code.EMPTY;
+        }
+    }
+
+    /**
+     * @param name
+     * @param target
+     * @param parameters
+     * @return
+     */
+    static SingleLineCode call(Object name, Object target, Object... parameters) {
+
+        if (parameters.length > 0) {
+
+            //属于调用方法
+            return SingleLineCode.valueOf(Code.toCode(name + "." + Code.toInstance(target, parameters)));
+        } else {
+
+            return SingleLineCode.valueOf(Code.toCode(name + "." + target));
+        }
+    }
 
     /**
      * 字符串转Code
@@ -28,14 +73,24 @@ public interface Code {
      * @param input
      * @return
      */
-    static Code toCode(String input) {
+    static Code toCode(String input, Object... args) {
+
+        return toCode(input, CodeFormats.GENERAL, args);
+    }
+
+    static Code toCode(String input, CodeFormat format, Object... args) {
 
         return new Code() {
 
             @Override
             public String toString() {
 
-                return input;
+                return String.format(input, args);
+            }
+
+            @Override
+            public CodeFormat getCodeFormat() {
+                return format;
             }
         };
     }
@@ -58,14 +113,20 @@ public interface Code {
         };
     }
 
-    static Code toInstance(Code... params) {
+    /**
+     * new Object(arg0, arg1, ...)
+     *
+     * @param params
+     * @return
+     */
+    static Code toInstance(Object start, Object... params) {
 
         return new Code() {
 
             @Override
             public String toString() {
 
-                return "(" + Joiner.on(", ").join(params) + ")";
+                return start + "(" + Joiner.on(", ").join(params) + ")";
             }
         };
     }

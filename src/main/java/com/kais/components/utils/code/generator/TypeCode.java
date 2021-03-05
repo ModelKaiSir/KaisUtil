@@ -19,7 +19,15 @@ public class TypeCode implements Code {
     public TypeCode(String name, String classes, Class<?> typeClass) {
 
         this.name = Code.toCode(name);
-        this.classes = Code.toCode(classes);
+
+        if (null == classes) {
+
+            this.classes = null;
+        } else {
+
+            this.classes = Code.toCode(classes);
+        }
+
         this.typeClass = typeClass;
     }
 
@@ -43,15 +51,16 @@ public class TypeCode implements Code {
 
     public static TypeCode valueOf(String name, String classes) {
 
-        try {
-            return new TypeCode(name, classes, Class.forName(classes));
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException(e);
-        }
+        return new TypeCode(name, classes, null);
     }
 
-    public static TypeCode valueOf(Class<?> classes) {
+    public static TypeCode classOf(Class<?> classes) {
 
         return new TypeCode(classes.getSimpleName(), classes.getName(), classes);
+    }
+
+    public static TypeCode classOf(String name, Class<?> classes) {
+
+        return new TypeCode(name, classes.getName(), classes);
     }
 }

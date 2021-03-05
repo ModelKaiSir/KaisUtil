@@ -1,45 +1,45 @@
 package com.kais.components.utils.code.generator;
 
-import java.lang.reflect.Constructor;
+import com.sun.org.apache.regexp.internal.RESyntaxException;
+
 import java.lang.reflect.Modifier;
-import java.util.Collections;
-import java.util.Date;
 
 /**
  * 描述Field字段
+ * [SCOPE] [TYPE] [NAME] ? [INSTANCE];
  *
  * @author QiuKai
  */
-public class FieldCode extends AbstractCode {
+public class FieldCode extends SingleLineCode implements CallableCode {
 
     private int modifier = Modifier.PROTECTED;
 
-    private TypeCode type;
+    private TypeCode fieldType;
     private Code name;
 
     public FieldCode(TypeCode type, String name) {
 
-        this.type = type;
+        this.fieldType = type;
         this.name = Code.toCode(name);
 
-        super.codes.add(getScope(modifier));
-        super.codes.add(type);
-        super.codes.add(this.name);
+        addContent(Code.getScope(modifier), type, name);
     }
 
     public FieldCode(int modifier, TypeCode type, String name) {
 
         this.modifier = modifier;
-        this.type = type;
+        this.fieldType = type;
         this.name = Code.toCode(name);
 
-        super.codes.add(getScope(modifier));
-        super.codes.add(type);
-        super.codes.add(this.name);
+        addContent(Code.getScope(modifier), type, name);
+    }
+
+    private FieldCode() {
+
     }
 
     public TypeCode getType() {
-        return type;
+        return fieldType;
     }
 
     public Code getName() {
@@ -47,49 +47,90 @@ public class FieldCode extends AbstractCode {
         return name;
     }
 
-    public FieldCode instance(Code value) {
+    public FieldCode instance(Object instance) {
 
-        codes.add(Code.toCode("="));
-        codes.add(value);
+        addContent("=", instance);
         return this;
     }
 
-    public FieldCode newInstance(Code value, Code... params) {
+    public FieldCode unNewInstance(Object instance) {
 
-        codes.add(Code.toCode("="));
-        codes.add(Code.NEW);
+        addContent(Codes.NEW, instance);
+        return this;
+    }
 
-        if (value instanceof TypeCode) {
+    public FieldCode newInstance(Object instance) {
 
-            if (null != ((TypeCode) value).getTypeClass()) {
+        addContent("=", Codes.NEW, instance);
+        return this;
+    }
 
-                codes.add(Code.toCode(((TypeCode) value).getTypeClass().getSimpleName()));
-            } else {
+    public String toSimpleString() {
 
-                codes.add(value);
-            }
+        return String.format("%s %s", fieldType, name);
+    }
+
+    public FieldCode convert(ConvertMode mode) {
+
+        return mode.convert(this);
+    }
+
+    @Override
+    public SingleLineCode call(Object target, Object... parameters) {
+
+        if (parameters.length > 0) {
+
+            //属于调用方法
+            return SingleLineCode.valueOf(Code.toCode(name + "." + Code.toInstance(target, parameters)));
         } else {
 
-            codes.add(value);
+            return SingleLineCode.valueOf(Code.toCode(name + "." + target));
         }
-
-        if (null != params && params.length > 0) {
-
-            codes.add(Code.toInstance(params));
-        }
-        return this;
     }
 
-    public static void main(String[] args) {
+    public enum ConvertMode {
 
-        TypeCode t = TypeCode.valueOf(int.class);
-        TypeCode t2 = TypeCode.valueOf(Date.class);
+        NO_SCOPE {
 
-        FieldCode c = new FieldCode(t, "start").instance(Code.toCode("1")).end();
-        FieldCode c2 = new FieldCode(t, "end").instance(Code.toCode("1")).end();
+            @Override
+            FieldCode convert(FieldCode source) {
 
-        FieldCode c3 = new FieldCode(t2, "sysDate").newInstance(t2, c.getName(), c2.getName()).end();
-        System.out.println(c);
-        System.out.println(c3);
+                FieldCode result = new FieldCode();
+
+                // 隐式调用，不需要scope
+                result.name = source.name;
+                result.fieldType = source.fieldType;
+                result.addContent(source.fieldType, source.name);
+                return result;
+            }
+        }, NO_NAME {
+
+            @Override
+            FieldCode convert(FieldCode source) {
+
+                FieldCode result = new FieldCode();
+
+                // 隐式调用，不需要scope
+                result.name = source.name;
+                result.fieldType = source.fieldType;
+                return result;
+            }
+        },
+        ONLY_NAME{
+
+            @Override
+            FieldCode convert(FieldCode source) {
+
+                FieldCode result = new FieldCode();
+
+                // 隐式调用，不需要scope
+                result.name = source.name;
+                result.fieldType = source.fieldType;
+                result.addContent(source.name);
+                return result;
+            }
+        };
+
+        abstract FieldCode convert(FieldCode source);
     }
 }

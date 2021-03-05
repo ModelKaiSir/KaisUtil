@@ -8,6 +8,6 @@ public class Test {
         assert true;
         System.out.println("go on");
         assert false:"stop";
-        System.out.println("end");
+        System.out.println("foot");
     }
 }
